@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers(antMatcher("/usersdb/users")).permitAll()
+                                //.requestMatchers(antMatcher("/usersdb/users")).permitAll()
                                 //.requestMatchers("/usersdb/users/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
@@ -41,7 +41,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails user = User.builder()
                 .username("user")
-                .password(passwordEncoder().encode("passwordU"))
+                .password(passwordEncoder().encode("password"))
                 .roles("USER")
                 .build();
         UserDetails admin = User.builder()
