@@ -5,54 +5,44 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import static org.springframework.security.config.Customizer.withDefaults;
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests((authorizeHttpRequests) ->
-                        authorizeHttpRequests
-                                //.requestMatchers(antMatcher("/usersdb/users")).permitAll()
-                                //.requestMatchers("/usersdb/users/**").hasRole("ADMIN")
-                                .anyRequest().authenticated()
-                )
-                .httpBasic(withDefaults());
-                //.formLogin(withDefaults());
-        return http.build();
-    }
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.builder()
-                .username("user")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder().encode("password"))
-                .roles("ADMIN", "USER")
-                .build();
-        return new InMemoryUserDetailsManager(user, admin);
+        //User Role
+        UserDetails theUser = User.withUsername("sergey")
+                .passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder()::encode)
+                .password("123").roles("USER").build();
+        //Manager Role
+        UserDetails theManager = User.withUsername("john")
+                .passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder()::encode)
+                .password("456").roles("ADMIN").build();
+        InMemoryUserDetailsManager userDetailsManager = new InMemoryUserDetailsManager();
+        userDetailsManager.createUser(theUser);
+        userDetailsManager.createUser(theManager);
+        return userDetailsManager;
     }
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public SecurityFilterChain configure(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((authz) -> authz
+                        .requestMatchers("/usersdb/users").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .httpBasic(withDefaults())
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        return http.build();
     }
 }
