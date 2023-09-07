@@ -14,18 +14,14 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import static org.springframework.security.config.http.MatcherType.ant;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
-        //User Role
         UserDetails theUser = User.withUsername("sergey")
                 .passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder()::encode)
                 .password("123").roles("USER").build();
-        //Manager Role
         UserDetails theManager = User.withUsername("john")
                 .passwordEncoder(PasswordEncoderFactories.createDelegatingPasswordEncoder()::encode)
                 .password("456").roles("ADMIN").build();
@@ -39,8 +35,6 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authz)->authz
                 .requestMatchers(new AntPathRequestMatcher("/users")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/users/**")).hasRole("ADMIN")
-                        .requestMatchers(new AntPathRequestMatcher("usersdb/users")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("usersdb/users/**")).hasRole("ADMIN")
                 .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults());
