@@ -1,5 +1,6 @@
 package com.example.usersdb.entities;
 
+import com.example.usersdb.DTOs.UserDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -40,9 +41,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "group_id"))
     @JsonIgnoreProperties("group_users")
     private Set<Group> groups;
-    public User(String name, Long age) {
-        this.name = name;
-        this.age = age;
+    public User(UserDTO userDTO) {
+        this.name = userDTO.getName();
+        this.age = userDTO.getAge();
     }
     @Transactional
     public void addRole(Role role){

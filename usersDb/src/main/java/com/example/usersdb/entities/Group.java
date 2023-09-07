@@ -1,5 +1,6 @@
 package com.example.usersdb.entities;
 
+import com.example.usersdb.DTOs.GroupDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,8 +27,8 @@ public class Group {
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("groups")
     private Set<User> group_users = new HashSet<>();
-    public Group(String name, Long rating) {
-        this.name = name;
-        this.rating = rating;
+    public Group(GroupDTO groupDTO) {
+        this.name = groupDTO.getName();
+        this.rating = groupDTO.getRating();
     }
 }

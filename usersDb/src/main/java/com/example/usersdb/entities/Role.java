@@ -1,5 +1,6 @@
 package com.example.usersdb.entities;
 
+import com.example.usersdb.DTOs.RoleDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,7 +26,7 @@ public class Role {
     @JsonIgnoreProperties("roles")
     private Set<User> role_users = new HashSet<>();
 
-    public Role(String name){
-        this.name = name;
+    public Role(RoleDTO roleDTO){
+        this.name = roleDTO.getName();
     }
 }
