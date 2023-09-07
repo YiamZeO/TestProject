@@ -35,7 +35,7 @@ public class UsersController {
         return usersService.updateUser(id, userDTO);
     }
     @GetMapping("/findBy")
-    public List<User> findByCriteria(@RequestParam(required = false) @NotBlank String name,
+    public List<User> findByCriteria(@RequestParam(required = false) String name,
                                      @RequestParam(required = false) Long minAge,
                                      @RequestParam(required = false) Long maxAge){
         return usersService.findByCriteria(name, minAge, maxAge);
