@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
 @Service
 @Setter
 public class UsersService implements UserDetailsService {
-    private UsersRepository usersRepository;
-    private RolesRepository rolesRepository;
-    private GroupsRepository groupsRepository;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UsersRepository usersRepository;
+    private final RolesRepository rolesRepository;
+    private final GroupsRepository groupsRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    public UsersService(UsersRepository usersRepository, RolesRepository rolesRepository, GroupsRepository groupsRepository) {
+    public UsersService(UsersRepository usersRepository, RolesRepository rolesRepository, GroupsRepository groupsRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.usersRepository = usersRepository;
         this.rolesRepository = rolesRepository;
         this.groupsRepository = groupsRepository;

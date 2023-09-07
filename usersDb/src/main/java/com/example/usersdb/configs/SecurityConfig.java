@@ -1,7 +1,5 @@
 package com.example.usersdb.configs;
 
-import com.example.usersdb.services.UsersService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,12 +15,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private UsersService usersService;
-
-    @Autowired
-    public SecurityConfig(UsersService usersService) {
-        this.usersService = usersService;
-    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((authz)->authz
