@@ -11,58 +11,77 @@ import com.example.usersdb.repositories.specs.UsersSpecs;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Setter
-public class UsersService {
+public class UsersService implements UserDetailsService {
     private UsersRepository usersRepository;
     private RolesRepository rolesRepository;
     private GroupsRepository groupsRepository;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
     public UsersService(UsersRepository usersRepository, RolesRepository rolesRepository, GroupsRepository groupsRepository) {
         this.usersRepository = usersRepository;
         this.rolesRepository = rolesRepository;
         this.groupsRepository = groupsRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
-
     public List<User> findAllUsers(){
         return usersRepository.findAll();
     }
     @Transactional
+    @Secured(value = "ADMIN")
     public List<User> saveUser(UserDTO userDTO){
+        userDTO.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
         usersRepository.save(new User(userDTO));
         return usersRepository.findAll();
     }
     @Transactional
+    @Secured(value = "ADMIN")
     public List<User> deleteById(Long id){
         usersRepository.deleteById(id);
         return usersRepository.findAll();
     }
     @Transactional
+    @Secured(value = "ADMIN")
     public List<User> updateUser(Long id, UserDTO userDTO){
         Optional<User> o = usersRepository.findById(id);
         if (o.isPresent()){
             User u = o.get();
             u.setName(userDTO.getName());
             u.setAge(userDTO.getAge());
+            u.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
             usersRepository.save(u);
         }
         return usersRepository.findAll();
     }
     public List<User> findByCriteria(String name, Long minAge, Long maxAge){
         Specification<User> spec = Specification.where(null);
-        spec = spec.and(UsersSpecs.nameIs(name));
-        spec = spec.and(UsersSpecs.ageGrThenOrEq(minAge));
-        spec = spec.and(UsersSpecs.ageLeThenOrEq(maxAge));
+        if(name != null && !name.isEmpty())
+            spec = spec.and(UsersSpecs.nameIs(name));
+        if(minAge != null && minAge >= 0)
+            spec = spec.and(UsersSpecs.ageGrThenOrEq(minAge));
+        if(maxAge != null && maxAge >= 0)
+            spec = spec.and(UsersSpecs.ageLeThenOrEq(maxAge));
         return usersRepository.findAll(spec);
     }
     @Transactional
+    @Secured(value = "ADMIN")
     public List<User> delUserRole(Long userId, Long roleId){
         Optional<User> u = usersRepository.findById(userId);
         Optional<Role> r = rolesRepository.findById(roleId);
@@ -72,6 +91,7 @@ public class UsersService {
         return usersRepository.findAll();
     }
     @Transactional
+    @Secured(value = "ADMIN")
     public List<User> addUserRole(Long userId, Long roleId){
         Optional<User> u = usersRepository.findById(userId);
         Optional<Role> r = rolesRepository.findById(roleId);
@@ -81,6 +101,7 @@ public class UsersService {
         return usersRepository.findAll();
     }
     @Transactional
+    @Secured(value = "ADMIN")
     public List<User> delUserGroup(Long userId, Long groupId){
         Optional<User> u = usersRepository.findById(userId);
         Optional<Group> g = groupsRepository.findById(groupId);
@@ -90,6 +111,7 @@ public class UsersService {
         return usersRepository.findAll();
     }
     @Transactional
+    @Secured(value = "ADMIN")
     public List<User> addUserGroup(Long userId, Long groupId){
         Optional<User> u = usersRepository.findById(userId);
         Optional<Group> g = groupsRepository.findById(groupId);
@@ -97,5 +119,17 @@ public class UsersService {
             return (List<User>) null;
         u.get().addGroup(g.get());
         return usersRepository.findAll();
+    }
+    @Override
+    @Transactional
+    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
+        User u = usersRepository.findOneByName(name);
+        if (u == null)
+            throw  new UsernameNotFoundException("Invalid username or password.");
+        return new org.springframework.security.core.userdetails.User(u.getName(), u.getPassword(),
+                mapRolesToAuthorities(u.getRoles()));
+    }
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles){
+        return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
 }

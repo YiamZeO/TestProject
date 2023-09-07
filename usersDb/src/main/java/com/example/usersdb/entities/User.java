@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
@@ -25,6 +26,8 @@ public class User {
     private String name;
     @Column
     private Long age;
+    @Column
+    private String password;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",

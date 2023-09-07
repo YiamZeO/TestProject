@@ -6,7 +6,6 @@ import com.example.usersdb.services.UsersService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -40,9 +39,9 @@ public class UsersController {
         return usersService.updateUser(id, userDTO);
     }
     @GetMapping("/findBy")
-    public List<User> findByCriteria(@RequestParam(required = false) @NotBlank String name,
-                                     @RequestParam(required = false) @Min(0) Long minAge,
-                                     @RequestParam(required = false) @Min(0) Long maxAge){
+    public List<User> findByCriteria(@RequestParam(required = false) String name,
+                                     @RequestParam(required = false) Long minAge,
+                                     @RequestParam(required = false) Long maxAge){
         return usersService.findByCriteria(name, minAge, maxAge);
     }
     @DeleteMapping("/delUserRole")

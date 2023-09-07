@@ -7,7 +7,9 @@ import lombok.Data;
 @Data
 public class UserDTO {
     @NotBlank
-    String name;
+    private String name;
     @Min(0)
-    Long age;
+    private Long age;
+    @NotBlank
+    private String password;
 }
