@@ -41,9 +41,6 @@ public class UsersService implements UserDetailsService {
         this.groupsRepository = groupsRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
-    public List<User> findAllUsers(){
-        return usersRepository.findAll();
-    }
     @Transactional
     @Secured(value = "ADMIN")
     public List<User> saveUser(UserDTO userDTO){

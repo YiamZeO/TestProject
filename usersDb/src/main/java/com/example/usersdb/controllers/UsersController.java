@@ -22,10 +22,6 @@ public class UsersController {
     public UsersController(UsersService usersService) {
         this.usersService = usersService;
     }
-    @GetMapping
-    public List<User> getAllUsers(){
-        return usersService.findAllUsers();
-    }
     @PostMapping("/addUser")
     public List<User> saveUser(@RequestBody @Valid UserDTO userDTO){
         return usersService.saveUser(userDTO);
@@ -39,7 +35,7 @@ public class UsersController {
         return usersService.updateUser(id, userDTO);
     }
     @GetMapping("/findBy")
-    public List<User> findByCriteria(@RequestParam(required = false) String name,
+    public List<User> findByCriteria(@RequestParam(required = false) @NotBlank String name,
                                      @RequestParam(required = false) Long minAge,
                                      @RequestParam(required = false) Long maxAge){
         return usersService.findByCriteria(name, minAge, maxAge);
