@@ -53,10 +53,10 @@ public class ProductsService {
         if (productSpecDTO.getMaxQuality() != null)
             spec = spec.and(ProductsSpecs.qualityLeThenOrEq(productSpecDTO.getMaxQuality()));
         if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty())
-            for(Long t : productSpecDTO.getTagsIdList()){
-                TagsForProducts tag = new TagsForProducts();
-                tag.setId(t);
-                spec = spec.and(ProductsSpecs.isContainTag(tag));
+            for(Long id : productSpecDTO.getTagsIdList()){
+                Optional<TagsForProducts> tag = tagsForProductsRepository.findById(id);
+                if(tag.isPresent())
+                    spec = spec.or(ProductsSpecs.isContainTag(tag.get()));
             }
         Page<Product> products = productsRepository.findAll(spec, PageRequest.of(productSpecDTO.getCurPage() - 1,
                 productSpecDTO.getPageSize()));

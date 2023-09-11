@@ -27,16 +27,4 @@ public class TagsForProducts {
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("tags")
     private Set<Product> products;
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof TagsForProducts)) {
-            return false;
-        }
-        TagsForProducts l = (TagsForProducts) obj;
-        return this.getId().equals(l.getId());
-    }
 }

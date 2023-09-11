@@ -1,5 +1,6 @@
 package com.example.usersdb.dto;
 
+import com.example.usersdb.entities.TagsForProducts;
 import lombok.Data;
 
 import java.util.Date;
