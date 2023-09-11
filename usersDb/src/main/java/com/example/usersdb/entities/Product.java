@@ -39,6 +39,7 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @JsonIgnoreProperties("products")
     private Set<TagsForProducts> tags;
+
     public Product(ProductDTO productDTO) {
         this.name = productDTO.getName();
         this.date = productDTO.getDate();
@@ -46,14 +47,16 @@ public class Product {
         this.cost = productDTO.getCost();
         this.quality = productDTO.getQuality();
     }
+
     @Transactional
-    public void addTag(TagsForProducts tag){
+    public void addTag(TagsForProducts tag) {
         this.tags.add(tag);
         tag.getProducts().add(this);
         tag.setUsage(tag.getUsage() + 1);
     }
+
     @Transactional
-    public void delTag(TagsForProducts tag){
+    public void delTag(TagsForProducts tag) {
         this.tags.remove(tag);
         tag.getProducts().remove(this);
         tag.setUsage(tag.getUsage() - 1);

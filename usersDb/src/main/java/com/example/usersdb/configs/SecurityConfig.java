@@ -1,7 +1,5 @@
 package com.example.usersdb.configs;
 
-import com.example.usersdb.services.UsersService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,21 +17,23 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((authz)->authz
+        http.authorizeHttpRequests((authz) -> authz
                         .requestMatchers(new AntPathRequestMatcher("/users/findBy")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/users/**")).hasRole("ADMIN")
                         .requestMatchers(new AntPathRequestMatcher("/products/ProductsList")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/products/**")).hasRole("ADMIN")
-                .anyRequest().permitAll())
+                        .anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 //.formLogin(Customizer.withDefaults());
                 .httpBasic(Customizer.withDefaults());
         return http.build();
     }
+
     @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();

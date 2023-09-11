@@ -41,24 +41,27 @@ public class UsersService implements UserDetailsService {
         this.groupsRepository = groupsRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<User> saveUser(UserDTO userDTO){
+    public List<User> saveUser(UserDTO userDTO) {
         userDTO.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
         usersRepository.save(new User(userDTO));
         return usersRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<User> deleteById(Long id){
+    public List<User> deleteById(Long id) {
         usersRepository.deleteById(id);
         return usersRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<User> updateUser(Long id, UserDTO userDTO){
+    public List<User> updateUser(Long id, UserDTO userDTO) {
         Optional<User> o = usersRepository.findById(id);
-        if (o.isPresent()){
+        if (o.isPresent()) {
             User u = o.get();
             u.setName(userDTO.getName());
             u.setAge(userDTO.getAge());
@@ -67,66 +70,73 @@ public class UsersService implements UserDetailsService {
         }
         return usersRepository.findAll();
     }
-    public List<User> findByCriteria(String name, Long minAge, Long maxAge){
+
+    public List<User> findByCriteria(String name, Long minAge, Long maxAge) {
         Specification<User> spec = Specification.where(null);
-        if(name != null && !name.isEmpty())
+        if (name != null && !name.isEmpty())
             spec = spec.and(UsersSpecs.nameIs(name));
-        if(minAge != null && minAge >= 0)
+        if (minAge != null && minAge >= 0)
             spec = spec.and(UsersSpecs.ageGrThenOrEq(minAge));
-        if(maxAge != null && maxAge >= 0)
+        if (maxAge != null && maxAge >= 0)
             spec = spec.and(UsersSpecs.ageLeThenOrEq(maxAge));
         return usersRepository.findAll(spec);
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<User> delUserRole(Long userId, Long roleId){
+    public List<User> delUserRole(Long userId, Long roleId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Role> r = rolesRepository.findById(roleId);
         if (u.isEmpty() || r.isEmpty())
-            return (List<User>) null;
+            return null;
         u.get().removeRole(r.get());
         return usersRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<User> addUserRole(Long userId, Long roleId){
+    public List<User> addUserRole(Long userId, Long roleId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Role> r = rolesRepository.findById(roleId);
         if (u.isEmpty() || r.isEmpty())
-            return (List<User>) null;
+            return null;
         u.get().addRole(r.get());
         return usersRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<User> delUserGroup(Long userId, Long groupId){
+    public List<User> delUserGroup(Long userId, Long groupId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Group> g = groupsRepository.findById(groupId);
         if (u.isEmpty() || g.isEmpty())
-            return (List<User>) null;
+            return null;
         u.get().removeGroup(g.get());
         return usersRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<User> addUserGroup(Long userId, Long groupId){
+    public List<User> addUserGroup(Long userId, Long groupId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Group> g = groupsRepository.findById(groupId);
         if (u.isEmpty() || g.isEmpty())
-            return (List<User>) null;
+            return null;
         u.get().addGroup(g.get());
         return usersRepository.findAll();
     }
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
         User u = usersRepository.findOneByName(name);
         if (u == null)
-            throw  new UsernameNotFoundException("Invalid username or password.");
+            throw new UsernameNotFoundException("Invalid username or password.");
         return new org.springframework.security.core.userdetails.User(u.getName(), u.getPassword(),
                 mapRolesToAuthorities(u.getRoles()));
     }
-    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles){
+
+    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
 }

@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -27,6 +26,7 @@ public class Group {
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("groups")
     private Set<User> group_users;
+
     public Group(GroupDTO groupDTO) {
         this.name = groupDTO.getName();
         this.rating = groupDTO.getRating();

@@ -42,27 +42,32 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "group_id"))
     @JsonIgnoreProperties("group_users")
     private Set<Group> groups;
+
     public User(UserDTO userDTO) {
         this.name = userDTO.getName();
         this.age = userDTO.getAge();
     }
+
     @Transactional
-    public void addRole(Role role){
+    public void addRole(Role role) {
         this.roles.add(role);
         role.getRole_users().add(this);
     }
+
     @Transactional
-    public void removeRole(Role role){
+    public void removeRole(Role role) {
         this.roles.remove(role);
         role.getRole_users().remove(this);
     }
+
     @Transactional
-    public void addGroup(Group group){
+    public void addGroup(Group group) {
         this.groups.add(group);
         group.getGroup_users().add(this);
     }
+
     @Transactional
-    public void removeGroup(Group group){
+    public void removeGroup(Group group) {
         this.groups.remove(group);
         group.getGroup_users().remove(this);
     }

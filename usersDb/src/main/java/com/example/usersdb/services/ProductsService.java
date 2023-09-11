@@ -2,7 +2,8 @@ package com.example.usersdb.services;
 
 import com.example.usersdb.dto.ProductDTO;
 import com.example.usersdb.dto.ProductSpecDTO;
-import com.example.usersdb.entities.*;
+import com.example.usersdb.entities.Product;
+import com.example.usersdb.entities.TagsForProducts;
 import com.example.usersdb.repositories.ProductsRepository;
 import com.example.usersdb.repositories.TagsForProductsRepository;
 import com.example.usersdb.repositories.specs.ProductsSpecs;
@@ -15,7 +16,6 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,17 +25,19 @@ public class ProductsService {
     private static final int PAGE_SIZE = 3;
     private final ProductsRepository productsRepository;
     private final TagsForProductsRepository tagsForProductsRepository;
+
     @Autowired
     public ProductsService(ProductsRepository productsRepository, TagsForProductsRepository tagsForProductsRepository) {
         this.productsRepository = productsRepository;
         this.tagsForProductsRepository = tagsForProductsRepository;
     }
-    public FilteringResponsObject getProductsWithPgAndFl(ProductSpecDTO productSpecDTO){
+
+    public FilteringResponsObject getProductsWithPgAndFl(ProductSpecDTO productSpecDTO) {
         Specification<Product> spec = Specification.where(null);
         FilteringResponsObject res = new FilteringResponsObject();
         if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
             productSpecDTO.setCurPage(INITIAL_PAGE);
-        if(productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
+        if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
             productSpecDTO.setPageSize(PAGE_SIZE);
         if (productSpecDTO.getName() != null && !productSpecDTO.getName().isEmpty())
             spec = spec.and(ProductsSpecs.nameIs(productSpecDTO.getName()));
@@ -53,8 +55,8 @@ public class ProductsService {
             spec = spec.and(ProductsSpecs.qualityGrThenOrEq(productSpecDTO.getMinQuality()));
         if (productSpecDTO.getMaxQuality() != null)
             spec = spec.and(ProductsSpecs.qualityLeThenOrEq(productSpecDTO.getMaxQuality()));
-        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()){
-            for(TagsForProducts tag : tagsForProductsRepository.findAllById(productSpecDTO.getTagsIdList())){
+        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()) {
+            for (TagsForProducts tag : tagsForProductsRepository.findAllById(productSpecDTO.getTagsIdList())) {
                 spec = spec.or(ProductsSpecs.isContainTag(tag));
             }
         }
@@ -66,23 +68,26 @@ public class ProductsService {
         res.setDataList(products.getContent());
         return res;
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<Product> addProduct(ProductDTO productDTO){
+    public List<Product> addProduct(ProductDTO productDTO) {
         productsRepository.save(new Product(productDTO));
         return productsRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<Product> deleteById(Long id){
+    public List<Product> deleteById(Long id) {
         productsRepository.deleteById(id);
         return productsRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<Product> updateProduct(Long id, ProductDTO productDTO){
+    public List<Product> updateProduct(Long id, ProductDTO productDTO) {
         Optional<Product> o = productsRepository.findById(id);
-        if (o.isPresent()){
+        if (o.isPresent()) {
             Product p = o.get();
             p.setName(productDTO.getName());
             p.setCost(productDTO.getCost());
@@ -93,23 +98,25 @@ public class ProductsService {
         }
         return productsRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<Product> addProductTag(Long productId, Long tagId){
+    public List<Product> addProductTag(Long productId, Long tagId) {
         Optional<Product> p = productsRepository.findById(productId);
         Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
         if (p.isEmpty() || t.isEmpty())
-            return (List<Product>) null;
+            return null;
         p.get().addTag(t.get());
         return productsRepository.findAll();
     }
+
     @Transactional
     @Secured(value = "ADMIN")
-    public List<Product> delProductTag(Long productId, Long tagId){
+    public List<Product> delProductTag(Long productId, Long tagId) {
         Optional<Product> p = productsRepository.findById(productId);
         Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
         if (p.isEmpty() || t.isEmpty())
-            return (List<Product>) null;
+            return null;
         p.get().delTag(t.get());
         return productsRepository.findAll();
     }

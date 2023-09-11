@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -26,7 +25,7 @@ public class Role {
     @JsonIgnoreProperties("roles")
     private Set<User> role_users;
 
-    public Role(RoleDTO roleDTO){
+    public Role(RoleDTO roleDTO) {
         this.name = roleDTO.getName();
     }
 }
