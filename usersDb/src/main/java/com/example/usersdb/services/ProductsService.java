@@ -1,10 +1,11 @@
 package com.example.usersdb.services;
 
-import com.example.usersdb.DTOs.ProductDTO;
-import com.example.usersdb.DTOs.ProductSpecDTO;
+import com.example.usersdb.dto.ProductDTO;
+import com.example.usersdb.dto.ProductSpecDTO;
 import com.example.usersdb.entities.Product;
 import com.example.usersdb.repositories.ProductsRepository;
 import com.example.usersdb.repositories.specs.ProductsSpecs;
+import com.example.usersdb.responsObjects.FilteringResponsObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,8 +26,9 @@ public class ProductsService {
     public ProductsService(ProductsRepository productsRepository) {
         this.productsRepository = productsRepository;
     }
-    public List<Product> getProductsWithPgAndFl(ProductSpecDTO productSpecDTO){
+    public FilteringResponsObject getProductsWithPgAndFl(ProductSpecDTO productSpecDTO){
         Specification<Product> spec = Specification.where(null);
+        FilteringResponsObject res = new FilteringResponsObject();
         if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
             productSpecDTO.setCurPage(INITIAL_PAGE);
         if(productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
@@ -49,7 +51,11 @@ public class ProductsService {
             spec = spec.and(ProductsSpecs.qualityLeThenOrEq(productSpecDTO.getMaxQuality()));
         Page<Product> products = productsRepository.findAll(spec, PageRequest.of(productSpecDTO.getCurPage() - 1,
                 productSpecDTO.getPageSize()));
-        return products.getContent();
+        res.setCurrentPage(productSpecDTO.getCurPage());
+        res.setTotalPages(products.getTotalPages());
+        res.setPageSize(productSpecDTO.getPageSize());
+        res.setDataList(products.getContent());
+        return res;
     }
     @Transactional
     @Secured(value = "ADMIN")

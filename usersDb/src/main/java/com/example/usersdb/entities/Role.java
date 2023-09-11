@@ -1,6 +1,6 @@
 package com.example.usersdb.entities;
 
-import com.example.usersdb.DTOs.RoleDTO;
+import com.example.usersdb.dto.RoleDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.example.usersdb.controllers;
 
-import com.example.usersdb.DTOs.UserDTO;
+import com.example.usersdb.dto.UserDTO;
 import com.example.usersdb.entities.User;
 import com.example.usersdb.services.UsersService;
 import jakarta.validation.Valid;

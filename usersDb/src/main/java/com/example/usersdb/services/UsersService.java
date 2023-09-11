@@ -1,6 +1,6 @@
 package com.example.usersdb.services;
 
-import com.example.usersdb.DTOs.UserDTO;
+import com.example.usersdb.dto.UserDTO;
 import com.example.usersdb.entities.Group;
 import com.example.usersdb.entities.Role;
 import com.example.usersdb.entities.User;

@@ -1,15 +1,13 @@
 package com.example.usersdb.entities;
 
-import com.example.usersdb.DTOs.UserDTO;
+import com.example.usersdb.dto.UserDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Entity

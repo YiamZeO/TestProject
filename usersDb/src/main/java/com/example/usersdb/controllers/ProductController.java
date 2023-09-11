@@ -1,8 +1,9 @@
 package com.example.usersdb.controllers;
 
-import com.example.usersdb.DTOs.ProductDTO;
-import com.example.usersdb.DTOs.ProductSpecDTO;
+import com.example.usersdb.dto.ProductDTO;
+import com.example.usersdb.dto.ProductSpecDTO;
 import com.example.usersdb.entities.Product;
+import com.example.usersdb.responsObjects.FilteringResponsObject;
 import com.example.usersdb.services.ProductsService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -39,7 +40,7 @@ public class ProductController {
         return productsService.updateProduct(id, productDTO);
     }
     @GetMapping("/ProductsList")
-    public List<Product> ProductsWithFiltering(@RequestBody ProductSpecDTO productSpecDTO){
+    public FilteringResponsObject ProductsWithFiltering(@RequestBody ProductSpecDTO productSpecDTO){
         return productsService.getProductsWithPgAndFl(productSpecDTO);
     }
 }

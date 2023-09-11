@@ -1,7 +1,6 @@
 package com.example.usersdb.entities;
 
-import com.example.usersdb.DTOs.ProductDTO;
-import com.example.usersdb.DTOs.UserDTO;
+import com.example.usersdb.dto.ProductDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
