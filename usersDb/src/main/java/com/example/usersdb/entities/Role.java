@@ -24,7 +24,7 @@ public class Role {
     private String name;
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("roles")
-    private Set<User> role_users = new HashSet<>();
+    private Set<User> role_users;
 
     public Role(RoleDTO roleDTO){
         this.name = roleDTO.getName();

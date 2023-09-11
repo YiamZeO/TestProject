@@ -26,7 +26,7 @@ public class Group {
     private Long rating;
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("groups")
-    private Set<User> group_users = new HashSet<>();
+    private Set<User> group_users;
     public Group(GroupDTO groupDTO) {
         this.name = groupDTO.getName();
         this.rating = groupDTO.getRating();

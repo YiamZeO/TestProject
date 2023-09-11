@@ -3,6 +3,7 @@ package com.example.usersdb.dto;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 public class ProductSpecDTO {
@@ -16,4 +17,5 @@ public class ProductSpecDTO {
     Long maxQuality;
     Integer curPage;
     Integer pageSize;
+    List<Long> tagsIdList;
 }

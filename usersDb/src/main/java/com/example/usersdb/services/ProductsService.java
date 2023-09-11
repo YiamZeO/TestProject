@@ -2,8 +2,9 @@ package com.example.usersdb.services;
 
 import com.example.usersdb.dto.ProductDTO;
 import com.example.usersdb.dto.ProductSpecDTO;
-import com.example.usersdb.entities.Product;
+import com.example.usersdb.entities.*;
 import com.example.usersdb.repositories.ProductsRepository;
+import com.example.usersdb.repositories.TagsForProductsRepository;
 import com.example.usersdb.repositories.specs.ProductsSpecs;
 import com.example.usersdb.responsObjects.FilteringResponsObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,11 @@ public class ProductsService {
     private static final int INITIAL_PAGE = 1;
     private static final int PAGE_SIZE = 3;
     private final ProductsRepository productsRepository;
+    private final TagsForProductsRepository tagsForProductsRepository;
     @Autowired
-    public ProductsService(ProductsRepository productsRepository) {
+    public ProductsService(ProductsRepository productsRepository, TagsForProductsRepository tagsForProductsRepository) {
         this.productsRepository = productsRepository;
+        this.tagsForProductsRepository = tagsForProductsRepository;
     }
     public FilteringResponsObject getProductsWithPgAndFl(ProductSpecDTO productSpecDTO){
         Specification<Product> spec = Specification.where(null);
@@ -49,6 +52,12 @@ public class ProductsService {
             spec = spec.and(ProductsSpecs.qualityGrThenOrEq(productSpecDTO.getMinQuality()));
         if (productSpecDTO.getMaxQuality() != null)
             spec = spec.and(ProductsSpecs.qualityLeThenOrEq(productSpecDTO.getMaxQuality()));
+        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty())
+            for(Long t : productSpecDTO.getTagsIdList()){
+                TagsForProducts tag = new TagsForProducts();
+                tag.setId(t);
+                spec = spec.and(ProductsSpecs.isContainTag(tag));
+            }
         Page<Product> products = productsRepository.findAll(spec, PageRequest.of(productSpecDTO.getCurPage() - 1,
                 productSpecDTO.getPageSize()));
         res.setCurrentPage(productSpecDTO.getCurPage());
@@ -82,6 +91,26 @@ public class ProductsService {
             p.setQuality(p.getQuality());
             productsRepository.save(p);
         }
+        return productsRepository.findAll();
+    }
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> addProductTag(Long productId, Long tagId){
+        Optional<Product> p = productsRepository.findById(productId);
+        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
+        if (p.isEmpty() || t.isEmpty())
+            return (List<Product>) null;
+        p.get().addTag(t.get());
+        return productsRepository.findAll();
+    }
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> delProductTag(Long productId, Long tagId){
+        Optional<Product> p = productsRepository.findById(productId);
+        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
+        if (p.isEmpty() || t.isEmpty())
+            return (List<Product>) null;
+        p.get().delTag(t.get());
         return productsRepository.findAll();
     }
 }

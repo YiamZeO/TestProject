@@ -1,6 +1,7 @@
 package com.example.usersdb.repositories.specs;
 
 import com.example.usersdb.entities.Product;
+import com.example.usersdb.entities.TagsForProducts;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Date;
@@ -44,6 +45,11 @@ public class ProductsSpecs {
     public static Specification<Product> descriptionContain(String str){
         return (Specification<Product>)(root, criteriaQuery, criteriaBuldier)->{
             return criteriaBuldier.like(root.get("description"), "%"+str+"%");
+        };
+    }
+    public static Specification<Product> isContainTag(TagsForProducts tag){
+        return (Specification<Product>)(root, criteriaQuery, criteriaBuldier)->{
+            return criteriaBuldier.isMember(tag, root.get("tags"));
         };
     }
 }
