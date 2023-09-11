@@ -38,8 +38,8 @@ public class ProductController {
     public List<Product> updateProduct(@RequestParam @Min(0) Long id, @RequestBody @Valid ProductDTO productDTO){
         return productsService.updateProduct(id, productDTO);
     }
-    @GetMapping("getProducts")
-    public List<Product> getProducts(@RequestBody ProductSpecDTO productSpecDTO){
+    @GetMapping("/ProductsList")
+    public List<Product> ProductsWithFiltering(@RequestBody ProductSpecDTO productSpecDTO){
         return productsService.getProductsWithPgAndFl(productSpecDTO);
     }
 }

@@ -22,7 +22,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authz)->authz
                         .requestMatchers(new AntPathRequestMatcher("/users/findBy")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/users/**")).hasRole("ADMIN")
-                        .requestMatchers(new AntPathRequestMatcher("/products/getProducts")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/products/ProductsList")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/products/**")).hasRole("ADMIN")
                 .anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
