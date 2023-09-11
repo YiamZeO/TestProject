@@ -81,10 +81,10 @@ public class ProductsService {
             streamProducts = streamProducts.filter(p -> p.getName().equals(productSpecDTO.getName()));
         if (productSpecDTO.getMinDate() != null)
             streamProducts = streamProducts.filter(p -> p.getDate().after(productSpecDTO.getMinDate())
-            || p.getDate().equals(productSpecDTO.getMinDate()));
+                    || p.getDate().equals(productSpecDTO.getMinDate()));
         if (productSpecDTO.getMaxDate() != null)
             streamProducts = streamProducts.filter(p -> p.getDate().before(productSpecDTO.getMaxDate())
-            || p.getDate().equals(productSpecDTO.getMaxDate()));
+                    || p.getDate().equals(productSpecDTO.getMaxDate()));
         if (productSpecDTO.getDescrContain() != null && !productSpecDTO.getDescrContain().isEmpty())
             streamProducts = streamProducts.filter(p -> p.getDescription().contains(productSpecDTO.getDescrContain()));
         if (productSpecDTO.getMinCost() != null)
