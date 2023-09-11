@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class ProductsService {
@@ -41,10 +42,10 @@ public class ProductsService {
             productSpecDTO.setPageSize(PAGE_SIZE);
         if (productSpecDTO.getName() != null && !productSpecDTO.getName().isEmpty())
             spec = spec.and(ProductsSpecs.nameIs(productSpecDTO.getName()));
-        if (productSpecDTO.getMinD() != null)
-            spec = spec.and(ProductsSpecs.dateGrThenOrEq(productSpecDTO.getMinD()));
-        if (productSpecDTO.getMaxD() != null)
-            spec = spec.and(ProductsSpecs.dateLeThenOrEq(productSpecDTO.getMaxD()));
+        if (productSpecDTO.getMinDate() != null)
+            spec = spec.and(ProductsSpecs.dateGrThenOrEq(productSpecDTO.getMinDate()));
+        if (productSpecDTO.getMaxDate() != null)
+            spec = spec.and(ProductsSpecs.dateLeThenOrEq(productSpecDTO.getMaxDate()));
         if (productSpecDTO.getDescrContain() != null && !productSpecDTO.getDescrContain().isEmpty())
             spec = spec.and(ProductsSpecs.descriptionContain(productSpecDTO.getDescrContain()));
         if (productSpecDTO.getMinCost() != null)
@@ -66,6 +67,45 @@ public class ProductsService {
         res.setTotalPages(products.getTotalPages());
         res.setPageSize(productSpecDTO.getPageSize());
         res.setDataList(products.getContent());
+        return res;
+    }
+
+    public FilteringResponsObject getProductsWithPgAndFlStreamCase(ProductSpecDTO productSpecDTO) {
+        Stream<Product> streamProducts = productsRepository.findAll().stream();
+        FilteringResponsObject res = new FilteringResponsObject();
+        if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
+            productSpecDTO.setCurPage(INITIAL_PAGE);
+        if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
+            productSpecDTO.setPageSize(PAGE_SIZE);
+        if (productSpecDTO.getName() != null && !productSpecDTO.getName().isEmpty())
+            streamProducts = streamProducts.filter(p -> p.getName().equals(productSpecDTO.getName()));
+        if (productSpecDTO.getMinDate() != null)
+            streamProducts = streamProducts.filter(p -> p.getDate().after(productSpecDTO.getMinDate())
+            || p.getDate().equals(productSpecDTO.getMinDate()));
+        if (productSpecDTO.getMaxDate() != null)
+            streamProducts = streamProducts.filter(p -> p.getDate().before(productSpecDTO.getMaxDate())
+            || p.getDate().equals(productSpecDTO.getMaxDate()));
+        if (productSpecDTO.getDescrContain() != null && !productSpecDTO.getDescrContain().isEmpty())
+            streamProducts = streamProducts.filter(p -> p.getDescription().contains(productSpecDTO.getDescrContain()));
+        if (productSpecDTO.getMinCost() != null)
+            streamProducts = streamProducts.filter(p -> p.getCost() >= productSpecDTO.getMinCost());
+        if (productSpecDTO.getMaxCost() != null)
+            streamProducts = streamProducts.filter(p -> p.getCost() <= productSpecDTO.getMaxCost());
+        if (productSpecDTO.getMinQuality() != null)
+            streamProducts = streamProducts.filter(p -> p.getQuality() >= productSpecDTO.getMinQuality());
+        if (productSpecDTO.getMaxQuality() != null)
+            streamProducts = streamProducts.filter(p -> p.getQuality() <= productSpecDTO.getMaxQuality());
+        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()) {
+            List<TagsForProducts> tags = tagsForProductsRepository.findAllById(productSpecDTO.getTagsIdList());
+            streamProducts = streamProducts.filter(p -> p.getTags().containsAll(tags));
+        }
+        streamProducts = streamProducts.limit(((long) productSpecDTO.getPageSize() * productSpecDTO.getCurPage()))
+                .skip((long) productSpecDTO.getPageSize() * (productSpecDTO.getCurPage() - 1));
+        List<Product> resListProducts = streamProducts.toList();
+        res.setCurrentPage(productSpecDTO.getCurPage());
+        res.setTotalPages(resListProducts.size() / productSpecDTO.getPageSize());
+        res.setPageSize(productSpecDTO.getPageSize());
+        res.setDataList(resListProducts);
         return res;
     }
 

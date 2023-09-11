@@ -48,6 +48,11 @@ public class ProductController {
         return productsService.getProductsWithPgAndFl(productSpecDTO);
     }
 
+    @GetMapping("/ProductsListStreamCase")
+    public FilteringResponsObject ProductsWithFilteringStreamCase(@RequestBody ProductSpecDTO productSpecDTO) {
+        return productsService.getProductsWithPgAndFl(productSpecDTO);
+    }
+
     @DeleteMapping("/delProductTag")
     public List<Product> deleteProductTag(@RequestParam @Min(0) Long productId,
                                           @RequestParam @Min(0) Long tagId) {

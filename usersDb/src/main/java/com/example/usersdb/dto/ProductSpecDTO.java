@@ -8,8 +8,8 @@ import java.util.List;
 @Data
 public class ProductSpecDTO {
     String name;
-    Date minD;
-    Date maxD;
+    Date minDate;
+    Date maxDate;
     String descrContain;
     Long minCost;
     Long maxCost;
