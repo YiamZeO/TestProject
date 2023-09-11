@@ -15,6 +15,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,12 +53,11 @@ public class ProductsService {
             spec = spec.and(ProductsSpecs.qualityGrThenOrEq(productSpecDTO.getMinQuality()));
         if (productSpecDTO.getMaxQuality() != null)
             spec = spec.and(ProductsSpecs.qualityLeThenOrEq(productSpecDTO.getMaxQuality()));
-        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty())
-            for(Long id : productSpecDTO.getTagsIdList()){
-                Optional<TagsForProducts> tag = tagsForProductsRepository.findById(id);
-                if(tag.isPresent())
-                    spec = spec.or(ProductsSpecs.isContainTag(tag.get()));
+        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()){
+            for(TagsForProducts tag : tagsForProductsRepository.findAllById(productSpecDTO.getTagsIdList())){
+                spec = spec.or(ProductsSpecs.isContainTag(tag));
             }
+        }
         Page<Product> products = productsRepository.findAll(spec, PageRequest.of(productSpecDTO.getCurPage() - 1,
                 productSpecDTO.getPageSize()));
         res.setCurrentPage(productSpecDTO.getCurPage());

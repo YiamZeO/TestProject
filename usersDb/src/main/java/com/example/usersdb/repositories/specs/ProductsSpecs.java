@@ -2,9 +2,11 @@ package com.example.usersdb.repositories.specs;
 
 import com.example.usersdb.entities.Product;
 import com.example.usersdb.entities.TagsForProducts;
+import jakarta.persistence.criteria.ListJoin;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Date;
+import java.util.List;
 
 public class ProductsSpecs {
     public static Specification<Product> nameIs(String name){
