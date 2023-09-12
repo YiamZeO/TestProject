@@ -5,6 +5,7 @@ import com.example.usersdb.dto.ProductSpecDTO;
 import com.example.usersdb.entities.Product;
 import com.example.usersdb.entities.TagsForProducts;
 import com.example.usersdb.repositories.ProductsRepository;
+import com.example.usersdb.repositories.ProductsRepositoryJdbc;
 import com.example.usersdb.repositories.TagsForProductsRepository;
 import com.example.usersdb.repositories.specs.ProductsSpecs;
 import com.example.usersdb.responsObjects.FilteringResponsObject;
@@ -26,11 +27,31 @@ public class ProductsService {
     private static final int PAGE_SIZE = 3;
     private final ProductsRepository productsRepository;
     private final TagsForProductsRepository tagsForProductsRepository;
+    private final ProductsRepositoryJdbc productsRepositoryJdbc;
 
     @Autowired
-    public ProductsService(ProductsRepository productsRepository, TagsForProductsRepository tagsForProductsRepository) {
+    public ProductsService(ProductsRepository productsRepository, TagsForProductsRepository tagsForProductsRepository, ProductsRepositoryJdbc productsRepositoryJdbc) {
         this.productsRepository = productsRepository;
         this.tagsForProductsRepository = tagsForProductsRepository;
+        this.productsRepositoryJdbc = productsRepositoryJdbc;
+    }
+
+    public List<Product> findAllJdbc(){
+        return productsRepositoryJdbc.findAll();
+    }
+
+    public FilteringResponsObject getProductsWithPgAndFlJdbc(ProductSpecDTO productSpecDTO) {
+        FilteringResponsObject res = new FilteringResponsObject();
+        if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
+            productSpecDTO.setCurPage(INITIAL_PAGE);
+        if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
+            productSpecDTO.setPageSize(PAGE_SIZE);
+        List<Product> products = productsRepositoryJdbc.findBySpec(productSpecDTO);
+        res.setCurrentPage(productSpecDTO.getCurPage());
+        res.setTotalPages(products.size() / productSpecDTO.getPageSize());
+        res.setPageSize(productSpecDTO.getPageSize());
+        res.setDataList(products);
+        return res;
     }
 
     public FilteringResponsObject getProductsWithPgAndFl(ProductSpecDTO productSpecDTO) {

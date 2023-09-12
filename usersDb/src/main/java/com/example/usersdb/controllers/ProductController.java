@@ -25,43 +25,48 @@ public class ProductController {
         this.productsService = productsService;
     }
 
-    @PostMapping("/addProduct")
+    @PostMapping("/add_product")
     @Secured(value = "ADMIN")
     public List<Product> addProduct(@RequestBody @Valid ProductDTO productDTO) {
         return productsService.addProduct(productDTO);
     }
 
-    @DeleteMapping("/delProduct")
+    @DeleteMapping("/del_product")
     @Secured(value = "ADMIN")
     public List<Product> deleteProduct(@RequestParam @Min(0) Long id) {
         return productsService.deleteById(id);
     }
 
-    @PostMapping("/uppProduct")
+    @PostMapping("/upp_product")
     @Secured(value = "ADMIN")
     public List<Product> updateProduct(@RequestParam @Min(0) Long id, @RequestBody @Valid ProductDTO productDTO) {
         return productsService.updateProduct(id, productDTO);
     }
 
-    @GetMapping("/ProductsList")
-    public FilteringResponsObject ProductsWithFiltering(@RequestBody ProductSpecDTO productSpecDTO) {
+    @GetMapping("/products_list")
+    public FilteringResponsObject productsWithFiltering(@RequestBody ProductSpecDTO productSpecDTO) {
         return productsService.getProductsWithPgAndFl(productSpecDTO);
     }
 
-    @GetMapping("/ProductsListStreamCase")
-    public FilteringResponsObject ProductsWithFilteringStreamCase(@RequestBody ProductSpecDTO productSpecDTO) {
+    @GetMapping("/products_list_stream_case")
+    public FilteringResponsObject productsWithFilteringStreamCase(@RequestBody ProductSpecDTO productSpecDTO) {
         return productsService.getProductsWithPgAndFl(productSpecDTO);
     }
 
-    @DeleteMapping("/delProductTag")
+    @DeleteMapping("/del_product_tag")
     public List<Product> deleteProductTag(@RequestParam @Min(0) Long productId,
                                           @RequestParam @Min(0) Long tagId) {
         return productsService.delProductTag(productId, tagId);
     }
 
-    @PostMapping("/addProductTag")
+    @PostMapping("/add_product_tag")
     public List<Product> addProductTag(@RequestParam @Min(0) Long productId,
                                        @RequestParam @Min(0) Long tagId) {
         return productsService.addProductTag(productId, tagId);
+    }
+
+    @GetMapping("/products_find_all_jdbc")
+    public List<Product> productsFindAllJdbc() {
+        return productsService.findAllJdbc();
     }
 }
