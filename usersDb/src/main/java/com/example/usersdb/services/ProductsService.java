@@ -36,8 +36,55 @@ public class ProductsService {
         this.productsRepositoryJdbc = productsRepositoryJdbc;
     }
 
-    public List<Product> findAllJdbc(){
-        return productsRepositoryJdbc.findAll();
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> addProductTagJdbc(Long productId, Long tagId) {
+        Product p = productsRepositoryJdbc.findById(productId);
+        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
+        if (p != null || t.isEmpty())
+            return null;
+        productsRepositoryJdbc.productAddTag(productId, tagId);
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> delProductTagJdbc(Long productId, Long tagId) {
+        Product p = productsRepositoryJdbc.findById(productId);
+        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
+        if (p != null || t.isEmpty())
+            return null;
+        productsRepositoryJdbc.productDelTag(productId, tagId);
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> deleteProductJdbc(Long id) {
+        productsRepositoryJdbc.deleteById(id);
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> updateProductJdbc(Long id, ProductDTO productDTO) {
+        Product p = productsRepositoryJdbc.findById(id);
+        if (p != null) {
+            p.setName(productDTO.getName());
+            p.setCost(productDTO.getCost());
+            p.setDescription(p.getDescription());
+            p.setDate(productDTO.getDate());
+            p.setQuality(p.getQuality());
+            productsRepositoryJdbc.updateProduct(p, id);
+        }
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> addProductJdbc(ProductDTO productDTO) {
+        productsRepositoryJdbc.insertProduct(new Product(productDTO));
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
     }
 
     public FilteringResponsObject getProductsWithPgAndFlJdbc(ProductSpecDTO productSpecDTO) {
@@ -47,8 +94,11 @@ public class ProductsService {
         if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
             productSpecDTO.setPageSize(PAGE_SIZE);
         List<Product> products = productsRepositoryJdbc.findBySpec(productSpecDTO);
+        int totalPages = products.size() / productSpecDTO.getPageSize();
+        res.setTotalPages(totalPages == 0 ? 1 : totalPages);
+        products = products.stream().limit(((long) productSpecDTO.getPageSize() * productSpecDTO.getCurPage()))
+                .skip((long) productSpecDTO.getPageSize() * (productSpecDTO.getCurPage() - 1)).toList();
         res.setCurrentPage(productSpecDTO.getCurPage());
-        res.setTotalPages(products.size() / productSpecDTO.getPageSize());
         res.setPageSize(productSpecDTO.getPageSize());
         res.setDataList(products);
         return res;
@@ -124,7 +174,8 @@ public class ProductsService {
                 .skip((long) productSpecDTO.getPageSize() * (productSpecDTO.getCurPage() - 1));
         List<Product> resListProducts = streamProducts.toList();
         res.setCurrentPage(productSpecDTO.getCurPage());
-        res.setTotalPages(resListProducts.size() / productSpecDTO.getPageSize());
+        int totalPages = resListProducts.size() / productSpecDTO.getPageSize();
+        res.setTotalPages(totalPages == 0 ? 1 : totalPages);
         res.setPageSize(productSpecDTO.getPageSize());
         res.setDataList(resListProducts);
         return res;

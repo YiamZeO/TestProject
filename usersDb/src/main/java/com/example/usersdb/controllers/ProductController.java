@@ -25,6 +25,35 @@ public class ProductController {
         this.productsService = productsService;
     }
 
+    @DeleteMapping("/del_product_tag_jdbc")
+    public List<Product> deleteProductTagJdbc(@RequestParam @Min(0) Long productId,
+                                              @RequestParam @Min(0) Long tagId) {
+        return productsService.delProductTagJdbc(productId, tagId);
+    }
+
+    @PostMapping("/add_product_tag_jdbc")
+    public List<Product> addProductTagJdbc(@RequestParam @Min(0) Long productId,
+                                           @RequestParam @Min(0) Long tagId) {
+        return productsService.addProductTagJdbc(productId, tagId);
+    }
+
+    @DeleteMapping("/del_product_jdbc")
+    @Secured(value = "ADMIN")
+    public List<Product> deleteProductJdbc(@RequestParam @Min(0) Long id) {
+        return productsService.deleteProductJdbc(id);
+    }
+
+    @PostMapping("/add_product_jdbc")
+    @Secured(value = "ADMIN")
+    public List<Product> addProductJdbc(@RequestBody @Valid ProductDTO productDTO) {
+        return productsService.addProductJdbc(productDTO);
+    }
+
+    @GetMapping("/products_list_jdbc")
+    public FilteringResponsObject productsWithFilteringJdbc(@RequestBody ProductSpecDTO productSpecDTO) {
+        return productsService.getProductsWithPgAndFlJdbc(productSpecDTO);
+    }
+
     @PostMapping("/add_product")
     @Secured(value = "ADMIN")
     public List<Product> addProduct(@RequestBody @Valid ProductDTO productDTO) {
@@ -63,10 +92,5 @@ public class ProductController {
     public List<Product> addProductTag(@RequestParam @Min(0) Long productId,
                                        @RequestParam @Min(0) Long tagId) {
         return productsService.addProductTag(productId, tagId);
-    }
-
-    @GetMapping("/products_find_all_jdbc")
-    public List<Product> productsFindAllJdbc() {
-        return productsService.findAllJdbc();
     }
 }
