@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -38,7 +39,7 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @JsonIgnoreProperties("products")
-    private Set<TagsForProducts> tags;
+    private Set<TagsForProducts> tags = new HashSet<>();
 
     public Product(ProductDTO productDTO) {
         this.name = productDTO.getName();

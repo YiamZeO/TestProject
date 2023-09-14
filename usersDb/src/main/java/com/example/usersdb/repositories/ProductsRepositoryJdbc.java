@@ -11,10 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class ProductsRepositoryJdbc {
@@ -151,38 +148,45 @@ public class ProductsRepositoryJdbc {
             }
             sql.append(" FALSE) AND");
         }
-        List<Product> products;
         sql.append(" TRUE");
-        if (!params.isEmpty()) {
-            products = namedJdbcTemplate.query(sql.toString(), params,
-                    (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
-        } else {
-            products = namedJdbcTemplate.query(sql.toString(),
-                    (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
-        }
-        for (Product p : products) {
-            p.setTags(new HashSet<>(findTagsForProduct(p.getId())));
+        List<Product> products;
+        if (!params.isEmpty()) products = namedJdbcTemplate.query(sql.toString(), params,
+                (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
+        else products = namedJdbcTemplate.query(sql.toString(),
+                (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
+        if(!products.isEmpty()){
+            findTagsForProducts(products);
         }
         return products;
     }
 
-    public List<TagsForProducts> findTagsForProduct(Long productId) {
+    public void findTagsForProducts(List<Product> products) {
         String sqlGetTags = """
-                SELECT tags.tag_id as id, tags.name, tags.description, tags.usage FROM
-                (SELECT products_tags.product_id as product_id, tags_for_products.id as tag_id, tags_for_products.name,
+                SELECT products_tags.product_id, tags_for_products.id, tags_for_products.name,
                         tags_for_products.description,
                         tags_for_products.usage FROM users_schema.products_tags
-                         JOIN users_schema.tags_for_products ON tags_for_products.id = products_tags.tag_id) as "tags"
-                WHERE product_id = :productId""";
+                         JOIN users_schema.tags_for_products ON tags_for_products.id = products_tags.tag_id
+                WHERE product_id IN (:productIds)""";
         Map<String, Object> params = new HashMap<>();
-        params.put("productId", productId);
-        return namedJdbcTemplate.query(sqlGetTags, params, (resultSetTags, iTag) -> {
+        List<Long> productIds = new ArrayList<>();
+        for (Product p : products)
+            productIds.add(p.getId());
+        params.put("productIds", productIds);
+        namedJdbcTemplate.query(sqlGetTags, params, (resultSetTags, iTag) -> {
             TagsForProducts tag = new TagsForProducts();
             tag.setId(resultSetTags.getLong("id"));
             tag.setUsage(resultSetTags.getLong("usage"));
             tag.setName(resultSetTags.getString("name"));
             tag.setDescription(resultSetTags.getString("description"));
-            return tag;
+            Optional<Product> o = products.stream().filter(p -> {
+                try {
+                    return p.getId() == resultSetTags.getLong("product_id");
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }).findFirst();
+            o.ifPresent(product -> product.getTags().add(tag));
+            return null;
         });
     }
 }
