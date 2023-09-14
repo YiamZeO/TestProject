@@ -128,9 +128,11 @@ public class ProductsService {
         if (productSpecDTO.getMaxQuality() != null)
             spec = spec.and(ProductsSpecs.qualityLeThenOrEq(productSpecDTO.getMaxQuality()));
         if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()) {
+            Specification<Product> specTags = Specification.where(null);
             for (TagsForProducts tag : tagsForProductsRepository.findAllById(productSpecDTO.getTagsIdList())) {
-                spec = spec.or(ProductsSpecs.isContainTag(tag));
+                specTags = specTags.or(ProductsSpecs.isContainTag(tag));
             }
+            spec = spec.and(specTags);
         }
         Page<Product> products = productsRepository.findAll(spec, PageRequest.of(productSpecDTO.getCurPage() - 1,
                 productSpecDTO.getPageSize()));

@@ -77,7 +77,7 @@ public class ProductsRepositoryJdbc {
     public void updateProduct(Product product, Long productId) {
         String sql = """
                 UPDATE users_schema.products
-                SET name = :name, date = :date, descripion = :description,
+                SET name = :name, date = :date, description = :description,
                 cost = :cost, quality = :quality WHERE id = :id""";
         Map<String, Object> params = new HashMap<>();
         params.put("name", product.getName());
@@ -104,47 +104,60 @@ public class ProductsRepositoryJdbc {
     }
 
     public List<Product> findBySpec(ProductSpecDTO productSpecDTO) {
-        String sql = "SELECT * FROM users_schema.products WHERE";
+        StringBuilder sql = new StringBuilder("""
+                SELECT * FROM users_schema.products 
+                JOIN users_schema.products_tags ON products.id = products_tags.product_id
+                 WHERE 
+                """);
         Map<String, Object> params = new HashMap<>();
         if (productSpecDTO.getName() != null && !productSpecDTO.getName().isEmpty()) {
-            sql += " name = :productName AND";
+            sql.append(" products.name = :productName AND");
             params.put("productName", productSpecDTO.getName());
         }
         if (productSpecDTO.getMinDate() != null) {
-            sql += " date >= :productMinDate AND";
+            sql.append(" products.date >= :productMinDate AND");
             params.put("productMinDate", productSpecDTO.getMinDate());
         }
         if (productSpecDTO.getMaxDate() != null) {
-            sql += " date <= :productMaxDate AND";
+            sql.append(" products.date <= :productMaxDate AND");
             params.put("productMaxDate", productSpecDTO.getMaxDate());
         }
         if (productSpecDTO.getDescrContain() != null && !productSpecDTO.getDescrContain().isEmpty()) {
-            sql += " description LIKE '%:productDescrContain%' AND";
+            sql.append(" products.description LIKE '%:productDescrContain%' AND");
             params.put("productDescrContain", productSpecDTO.getDescrContain());
         }
         if (productSpecDTO.getMinCost() != null) {
-            sql += " cost >= :productMinCost AND";
+            sql.append(" products.cost >= :productMinCost AND");
             params.put("productMinCost", productSpecDTO.getMinCost());
         }
         if (productSpecDTO.getMaxCost() != null) {
-            sql += " cost <= :productMaxCost AND";
+            sql.append(" products.cost <= :productMaxCost AND");
             params.put("productMaxCost", productSpecDTO.getMaxCost());
         }
         if (productSpecDTO.getMinQuality() != null) {
-            sql += " quality >= :productMinQuality AND";
+            sql.append(" products.quality >= :productMinQuality AND");
             params.put("productMinQuality", productSpecDTO.getMinQuality());
         }
         if (productSpecDTO.getMaxQuality() != null) {
-            sql += " quality <= :productMaxQuality AND";
+            sql.append(" products.quality <= :productMaxQuality AND");
             params.put("productMaxQuality", productSpecDTO.getMaxQuality());
         }
+        if(productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()){
+            sql.append(" (");
+            for (int i = 0; i < productSpecDTO.getTagsIdList().size(); i++){
+                sql.append(" products_tags.tag_id = :tagId").append(i)
+                        .append(" OR");
+                params.put("tagId" + i, productSpecDTO.getTagsIdList().get(i));
+            }
+            sql.append(" FALSE) AND");
+        }
         List<Product> products;
-        sql += " TRUE";
+        sql.append(" TRUE");
         if (!params.isEmpty()) {
-            products = namedJdbcTemplate.query(sql, params,
+            products = namedJdbcTemplate.query(sql.toString(), params,
                     (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
         } else {
-            products = namedJdbcTemplate.query(sql,
+            products = namedJdbcTemplate.query(sql.toString(),
                     (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
         }
         for (Product p : products) {
