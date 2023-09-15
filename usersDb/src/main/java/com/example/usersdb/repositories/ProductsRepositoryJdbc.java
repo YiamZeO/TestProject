@@ -139,9 +139,9 @@ public class ProductsRepositoryJdbc {
             sql.append(" products.quality <= :productMaxQuality AND");
             params.put("productMaxQuality", productSpecDTO.getMaxQuality());
         }
-        if(productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()){
+        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()) {
             sql.append(" (");
-            for (int i = 0; i < productSpecDTO.getTagsIdList().size(); i++){
+            for (int i = 0; i < productSpecDTO.getTagsIdList().size(); i++) {
                 sql.append(" products_tags.tag_id = :tagId").append(i)
                         .append(" OR");
                 params.put("tagId" + i, productSpecDTO.getTagsIdList().get(i));
@@ -154,7 +154,7 @@ public class ProductsRepositoryJdbc {
                 (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
         else products = namedJdbcTemplate.query(sql.toString(),
                 (resultSetProducts, iProduct) -> productMapper(resultSetProducts));
-        if(!products.isEmpty()){
+        if (!products.isEmpty()) {
             findTagsForProducts(products);
         }
         return products;

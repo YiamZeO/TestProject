@@ -16,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -242,7 +239,7 @@ public class ProductsService {
         return productsRepository.findAll();
     }
 
-    public byte[] getProductsWithPgAndFlExcel(ProductSpecDTO productSpecDTO, ExcelDataStyleDTO excelDataStyleDTO){
+    public byte[] getProductsWithPgAndFlExcel(ProductSpecDTO productSpecDTO, ExcelDataStyleDTO excelDataStyleDTO) {
         byte[] bytes = {};
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Products");
@@ -259,7 +256,7 @@ public class ProductsService {
         return bytes;
     }
 
-    private short getColorIndex(String color){
+    private short getColorIndex(String color) {
         return switch (color) {
             case "white" -> IndexedColors.WHITE.getIndex();
             case "red" -> IndexedColors.RED1.getIndex();
