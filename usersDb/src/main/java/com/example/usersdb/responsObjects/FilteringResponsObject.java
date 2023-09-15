@@ -9,5 +9,5 @@ public class FilteringResponsObject {
     private Integer currentPage;
     private Integer totalPages;
     private Integer pageSize;
-    private List<? extends Object> dataList;
+    private List<?> dataList;
 }

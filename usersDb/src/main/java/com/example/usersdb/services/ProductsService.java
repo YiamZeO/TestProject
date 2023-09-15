@@ -1,5 +1,6 @@
 package com.example.usersdb.services;
 
+import com.example.usersdb.dto.ExcelDataStyleDTO;
 import com.example.usersdb.dto.ProductDTO;
 import com.example.usersdb.dto.ProductSpecDTO;
 import com.example.usersdb.entities.Product;
@@ -9,14 +10,20 @@ import com.example.usersdb.repositories.ProductsRepositoryJdbc;
 import com.example.usersdb.repositories.TagsForProductsRepository;
 import com.example.usersdb.repositories.specs.ProductsSpecs;
 import com.example.usersdb.responsObjects.FilteringResponsObject;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -234,4 +241,103 @@ public class ProductsService {
         p.get().delTag(t.get());
         return productsRepository.findAll();
     }
+
+    public byte[] getProductsWithPgAndFlExcel(ProductSpecDTO productSpecDTO, ExcelDataStyleDTO excelDataStyleDTO){
+        byte[] bytes = {};
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Products");
+            List<Product> products = (List<Product>) getProductsWithPgAndFl(productSpecDTO).getDataList();
+            createHeaderRowProducts(sheet, excelDataStyleDTO);
+            createDataRowsProducts(sheet, products, excelDataStyleDTO);
+            try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                workbook.write(outputStream);
+                bytes = outputStream.toByteArray();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return bytes;
+    }
+
+    private short getColorIndex(String color){
+        return switch (color) {
+            case "white" -> IndexedColors.WHITE.getIndex();
+            case "red" -> IndexedColors.RED1.getIndex();
+            case "green" -> IndexedColors.LIGHT_GREEN.getIndex();
+            default -> IndexedColors.BLACK.getIndex();
+        };
+    }
+
+    private void createHeaderRowProducts(Sheet sheet, ExcelDataStyleDTO excelDataStyleDTO) {
+        Row headerRow = sheet.createRow(0);
+        CellStyle headerCellStyle = sheet.getWorkbook().createCellStyle();
+        Font headerFont = sheet.getWorkbook().createFont();
+        headerFont.setBold(excelDataStyleDTO.getHeaderIsBold());
+        headerFont.setItalic(excelDataStyleDTO.getHeaderIsItalic());
+        headerFont.setColor(getColorIndex(excelDataStyleDTO.getHeaderFontColor()));
+        headerCellStyle.setFont(headerFont);
+        headerCellStyle.setFillForegroundColor(getColorIndex(excelDataStyleDTO.getHeaderColor()));
+        headerCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        sheet.setColumnWidth(5, 20 * 256);
+        sheet.setColumnWidth(4, 11 * 256);
+        sheet.setColumnWidth(1, 10 * 256);
+        Cell headerCell = headerRow.createCell(0);
+        headerCell.setCellValue("ID");
+        headerCell.setCellStyle(headerCellStyle);
+        headerCell = headerRow.createCell(1);
+        headerCell.setCellValue("Name");
+        headerCell.setCellStyle(headerCellStyle);
+        headerCell = headerRow.createCell(2);
+        headerCell.setCellValue("Cost");
+        headerCell.setCellStyle(headerCellStyle);
+        headerCell = headerRow.createCell(3);
+        headerCell.setCellValue("Quality");
+        headerCell.setCellStyle(headerCellStyle);
+        headerCell = headerRow.createCell(4);
+        headerCell.setCellValue("Date");
+        headerCell.setCellStyle(headerCellStyle);
+        headerCell = headerRow.createCell(5);
+        headerCell.setCellValue("Description");
+        headerCell.setCellStyle(headerCellStyle);
+    }
+
+    private void createDataRowsProducts(Sheet sheet, List<Product> products, ExcelDataStyleDTO excelDataStyleDTO) {
+        int rowNum = 1;
+        CellStyle dataCellStyle = sheet.getWorkbook().createCellStyle();
+        Font dataFont = sheet.getWorkbook().createFont();
+        dataFont.setBold(excelDataStyleDTO.getDataIsBold());
+        dataFont.setItalic(excelDataStyleDTO.getDataIsItalic());
+        dataFont.setColor(getColorIndex(excelDataStyleDTO.getDataFontColor()));
+        dataCellStyle.setFont(dataFont);
+        dataCellStyle.setFillForegroundColor(getColorIndex(excelDataStyleDTO.getDataColor()));
+        dataCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        dataCellStyle.setBorderLeft(BorderStyle.THIN);
+        dataCellStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+        dataCellStyle.setBorderRight(BorderStyle.THIN);
+        dataCellStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
+        dataCellStyle.setBorderBottom(BorderStyle.THIN);
+        dataCellStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
+        for (Product product : products) {
+            Row row = sheet.createRow(rowNum++);
+            Cell cell = row.createCell(0);
+            cell.setCellValue(product.getId());
+            cell.setCellStyle(dataCellStyle);
+            cell = row.createCell(1);
+            cell.setCellValue(product.getName());
+            cell.setCellStyle(dataCellStyle);
+            cell = row.createCell(2);
+            cell.setCellValue(product.getCost());
+            cell.setCellStyle(dataCellStyle);
+            cell = row.createCell(3);
+            cell.setCellValue(product.getQuality());
+            cell.setCellStyle(dataCellStyle);
+            cell = row.createCell(4);
+            cell.setCellValue(product.getDate().toString());
+            cell.setCellStyle(dataCellStyle);
+            cell = row.createCell(5);
+            cell.setCellValue(product.getDescription());
+            cell.setCellStyle(dataCellStyle);
+        }
+    }
+
 }

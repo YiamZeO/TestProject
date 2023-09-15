@@ -1,17 +1,28 @@
 package com.example.usersdb.controllers;
 
+import com.example.usersdb.dto.ExcelDataStyleDTO;
 import com.example.usersdb.dto.ProductDTO;
 import com.example.usersdb.dto.ProductSpecDTO;
+import com.example.usersdb.dto.ProductsSpecAndExcelDataStyleDTO;
 import com.example.usersdb.entities.Product;
 import com.example.usersdb.responsObjects.FilteringResponsObject;
 import com.example.usersdb.services.ProductsService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 @RestController
@@ -93,4 +104,15 @@ public class ProductController {
                                        @RequestParam @Min(0) Long tagId) {
         return productsService.addProductTag(productId, tagId);
     }
+
+    @GetMapping("/products_list_excel")
+    public ResponseEntity<byte[]> productsWithFilteringExcel(@RequestBody ProductsSpecAndExcelDataStyleDTO productsSpecAndExcelDataStyleDTO) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        headers.setContentDispositionFormData("attachment", "Products_table.xlsx");
+        return ResponseEntity.ok().headers(headers).
+                body(productsService.getProductsWithPgAndFlExcel(productsSpecAndExcelDataStyleDTO.getProductSpecDTO(),
+                        productsSpecAndExcelDataStyleDTO.getExcelDataStyleDTO()));
+    }
+
 }
