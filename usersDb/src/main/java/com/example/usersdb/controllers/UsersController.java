@@ -3,12 +3,12 @@ package com.example.usersdb.controllers;
 import com.example.usersdb.dto.UserDTO;
 import com.example.usersdb.entities.User;
 import com.example.usersdb.services.UsersService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
