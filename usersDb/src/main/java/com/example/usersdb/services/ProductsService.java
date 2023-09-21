@@ -20,6 +20,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.Validator;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
@@ -34,78 +35,10 @@ public class ProductsService {
     private final ProductsRepositoryJdbc productsRepositoryJdbc;
 
     @Autowired
-    public ProductsService(ProductsRepository productsRepository, TagsForProductsRepository tagsForProductsRepository, ProductsRepositoryJdbc productsRepositoryJdbc) {
+    public ProductsService(ProductsRepository productsRepository, TagsForProductsRepository tagsForProductsRepository, ProductsRepositoryJdbc productsRepositoryJdbc, Validator validator) {
         this.productsRepository = productsRepository;
         this.tagsForProductsRepository = tagsForProductsRepository;
         this.productsRepositoryJdbc = productsRepositoryJdbc;
-    }
-
-    @Transactional
-    @Secured(value = "ADMIN")
-    public List<Product> addProductTagJdbc(Long productId, Long tagId) {
-        Product p = productsRepositoryJdbc.findById(productId);
-        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
-        if (p != null || t.isEmpty())
-            return null;
-        productsRepositoryJdbc.productAddTag(productId, tagId);
-        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
-    }
-
-    @Transactional
-    @Secured(value = "ADMIN")
-    public List<Product> delProductTagJdbc(Long productId, Long tagId) {
-        Product p = productsRepositoryJdbc.findById(productId);
-        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
-        if (p != null || t.isEmpty())
-            return null;
-        productsRepositoryJdbc.productDelTag(productId, tagId);
-        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
-    }
-
-    @Transactional
-    @Secured(value = "ADMIN")
-    public List<Product> deleteProductJdbc(Long id) {
-        productsRepositoryJdbc.deleteById(id);
-        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
-    }
-
-    @Transactional
-    @Secured(value = "ADMIN")
-    public List<Product> updateProductJdbc(Long id, ProductDTO productDTO) {
-        Product p = productsRepositoryJdbc.findById(id);
-        if (p != null) {
-            p.setName(productDTO.getName());
-            p.setCost(productDTO.getCost());
-            p.setDescription(p.getDescription());
-            p.setDate(productDTO.getDate());
-            p.setQuality(p.getQuality());
-            productsRepositoryJdbc.updateProduct(p, id);
-        }
-        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
-    }
-
-    @Transactional
-    @Secured(value = "ADMIN")
-    public List<Product> addProductJdbc(ProductDTO productDTO) {
-        productsRepositoryJdbc.insertProduct(new Product(productDTO));
-        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
-    }
-
-    public FilteringResponsObject getProductsWithPgAndFlJdbc(ProductSpecDTO productSpecDTO) {
-        FilteringResponsObject res = new FilteringResponsObject();
-        if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
-            productSpecDTO.setCurPage(INITIAL_PAGE);
-        if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
-            productSpecDTO.setPageSize(PAGE_SIZE);
-        List<Product> products = productsRepositoryJdbc.findBySpec(productSpecDTO);
-        int totalPages = products.size() / productSpecDTO.getPageSize();
-        res.setTotalPages(totalPages == 0 ? 1 : totalPages);
-        products = products.stream().limit(((long) productSpecDTO.getPageSize() * productSpecDTO.getCurPage()))
-                .skip((long) productSpecDTO.getPageSize() * (productSpecDTO.getCurPage() - 1)).toList();
-        res.setCurrentPage(productSpecDTO.getCurPage());
-        res.setPageSize(productSpecDTO.getPageSize());
-        res.setDataList(products);
-        return res;
     }
 
     public FilteringResponsObject getProductsWithPgAndFl(ProductSpecDTO productSpecDTO) {
@@ -144,46 +77,6 @@ public class ProductsService {
         res.setTotalPages(products.getTotalPages());
         res.setPageSize(productSpecDTO.getPageSize());
         res.setDataList(products.getContent());
-        return res;
-    }
-
-    public FilteringResponsObject getProductsWithPgAndFlStreamCase(ProductSpecDTO productSpecDTO) {
-        Stream<Product> streamProducts = productsRepository.findAll().stream();
-        FilteringResponsObject res = new FilteringResponsObject();
-        if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
-            productSpecDTO.setCurPage(INITIAL_PAGE);
-        if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
-            productSpecDTO.setPageSize(PAGE_SIZE);
-        if (productSpecDTO.getName() != null && !productSpecDTO.getName().isEmpty())
-            streamProducts = streamProducts.filter(p -> p.getName().equals(productSpecDTO.getName()));
-        if (productSpecDTO.getMinDate() != null)
-            streamProducts = streamProducts.filter(p -> p.getDate().after(productSpecDTO.getMinDate())
-                    || p.getDate().equals(productSpecDTO.getMinDate()));
-        if (productSpecDTO.getMaxDate() != null)
-            streamProducts = streamProducts.filter(p -> p.getDate().before(productSpecDTO.getMaxDate())
-                    || p.getDate().equals(productSpecDTO.getMaxDate()));
-        if (productSpecDTO.getDescrContain() != null && !productSpecDTO.getDescrContain().isEmpty())
-            streamProducts = streamProducts.filter(p -> p.getDescription().contains(productSpecDTO.getDescrContain()));
-        if (productSpecDTO.getMinCost() != null)
-            streamProducts = streamProducts.filter(p -> p.getCost() >= productSpecDTO.getMinCost());
-        if (productSpecDTO.getMaxCost() != null)
-            streamProducts = streamProducts.filter(p -> p.getCost() <= productSpecDTO.getMaxCost());
-        if (productSpecDTO.getMinQuality() != null)
-            streamProducts = streamProducts.filter(p -> p.getQuality() >= productSpecDTO.getMinQuality());
-        if (productSpecDTO.getMaxQuality() != null)
-            streamProducts = streamProducts.filter(p -> p.getQuality() <= productSpecDTO.getMaxQuality());
-        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()) {
-            List<TagsForProducts> tags = tagsForProductsRepository.findAllById(productSpecDTO.getTagsIdList());
-            streamProducts = streamProducts.filter(p -> p.getTags().containsAll(tags));
-        }
-        streamProducts = streamProducts.limit(((long) productSpecDTO.getPageSize() * productSpecDTO.getCurPage()))
-                .skip((long) productSpecDTO.getPageSize() * (productSpecDTO.getCurPage() - 1));
-        List<Product> resListProducts = streamProducts.toList();
-        res.setCurrentPage(productSpecDTO.getCurPage());
-        int totalPages = resListProducts.size() / productSpecDTO.getPageSize();
-        res.setTotalPages(totalPages == 0 ? 1 : totalPages);
-        res.setPageSize(productSpecDTO.getPageSize());
-        res.setDataList(resListProducts);
         return res;
     }
 
@@ -337,4 +230,111 @@ public class ProductsService {
         }
     }
 
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> addProductTagJdbc(Long productId, Long tagId) {
+        Product p = productsRepositoryJdbc.findById(productId);
+        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
+        if (p != null || t.isEmpty())
+            return null;
+        productsRepositoryJdbc.productAddTag(productId, tagId);
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> delProductTagJdbc(Long productId, Long tagId) {
+        Product p = productsRepositoryJdbc.findById(productId);
+        Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
+        if (p != null || t.isEmpty())
+            return null;
+        productsRepositoryJdbc.productDelTag(productId, tagId);
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> deleteProductJdbc(Long id) {
+        productsRepositoryJdbc.deleteById(id);
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> updateProductJdbc(Long id, ProductDTO productDTO) {
+        Product p = productsRepositoryJdbc.findById(id);
+        if (p != null) {
+            p.setName(productDTO.getName());
+            p.setCost(productDTO.getCost());
+            p.setDescription(p.getDescription());
+            p.setDate(productDTO.getDate());
+            p.setQuality(p.getQuality());
+            productsRepositoryJdbc.updateProduct(p, id);
+        }
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    @Transactional
+    @Secured(value = "ADMIN")
+    public List<Product> addProductJdbc(ProductDTO productDTO) {
+        productsRepositoryJdbc.insertProduct(new Product(productDTO));
+        return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
+    }
+
+    public FilteringResponsObject getProductsWithPgAndFlJdbc(ProductSpecDTO productSpecDTO) {
+        FilteringResponsObject res = new FilteringResponsObject();
+        if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
+            productSpecDTO.setCurPage(INITIAL_PAGE);
+        if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
+            productSpecDTO.setPageSize(PAGE_SIZE);
+        List<Product> products = productsRepositoryJdbc.findBySpec(productSpecDTO);
+        int totalPages = products.size() / productSpecDTO.getPageSize();
+        res.setTotalPages(totalPages == 0 ? 1 : totalPages);
+        products = products.stream().limit(((long) productSpecDTO.getPageSize() * productSpecDTO.getCurPage()))
+                .skip((long) productSpecDTO.getPageSize() * (productSpecDTO.getCurPage() - 1)).toList();
+        res.setCurrentPage(productSpecDTO.getCurPage());
+        res.setPageSize(productSpecDTO.getPageSize());
+        res.setDataList(products);
+        return res;
+    }
+
+    public FilteringResponsObject getProductsWithPgAndFlStreamCase(ProductSpecDTO productSpecDTO) {
+        Stream<Product> streamProducts = productsRepository.findAll().stream();
+        FilteringResponsObject res = new FilteringResponsObject();
+        if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
+            productSpecDTO.setCurPage(INITIAL_PAGE);
+        if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
+            productSpecDTO.setPageSize(PAGE_SIZE);
+        if (productSpecDTO.getName() != null && !productSpecDTO.getName().isEmpty())
+            streamProducts = streamProducts.filter(p -> p.getName().equals(productSpecDTO.getName()));
+        if (productSpecDTO.getMinDate() != null)
+            streamProducts = streamProducts.filter(p -> p.getDate().after(productSpecDTO.getMinDate())
+                    || p.getDate().equals(productSpecDTO.getMinDate()));
+        if (productSpecDTO.getMaxDate() != null)
+            streamProducts = streamProducts.filter(p -> p.getDate().before(productSpecDTO.getMaxDate())
+                    || p.getDate().equals(productSpecDTO.getMaxDate()));
+        if (productSpecDTO.getDescrContain() != null && !productSpecDTO.getDescrContain().isEmpty())
+            streamProducts = streamProducts.filter(p -> p.getDescription().contains(productSpecDTO.getDescrContain()));
+        if (productSpecDTO.getMinCost() != null)
+            streamProducts = streamProducts.filter(p -> p.getCost() >= productSpecDTO.getMinCost());
+        if (productSpecDTO.getMaxCost() != null)
+            streamProducts = streamProducts.filter(p -> p.getCost() <= productSpecDTO.getMaxCost());
+        if (productSpecDTO.getMinQuality() != null)
+            streamProducts = streamProducts.filter(p -> p.getQuality() >= productSpecDTO.getMinQuality());
+        if (productSpecDTO.getMaxQuality() != null)
+            streamProducts = streamProducts.filter(p -> p.getQuality() <= productSpecDTO.getMaxQuality());
+        if (productSpecDTO.getTagsIdList() != null && !productSpecDTO.getTagsIdList().isEmpty()) {
+            List<TagsForProducts> tags = tagsForProductsRepository.findAllById(productSpecDTO.getTagsIdList());
+            streamProducts = streamProducts.filter(p -> p.getTags().containsAll(tags));
+        }
+        streamProducts = streamProducts.limit(((long) productSpecDTO.getPageSize() * productSpecDTO.getCurPage()))
+                .skip((long) productSpecDTO.getPageSize() * (productSpecDTO.getCurPage() - 1));
+        List<Product> resListProducts = streamProducts.toList();
+        res.setCurrentPage(productSpecDTO.getCurPage());
+        int totalPages = resListProducts.size() / productSpecDTO.getPageSize();
+        res.setTotalPages(totalPages == 0 ? 1 : totalPages);
+        res.setPageSize(productSpecDTO.getPageSize());
+        res.setDataList(resListProducts);
+        return res;
+    }
 }

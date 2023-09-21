@@ -1,8 +1,9 @@
 package com.example.usersdb.dto;
 
+import lombok.Data;
+
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
-import lombok.Data;
 
 @Data
 public class UserDTO {

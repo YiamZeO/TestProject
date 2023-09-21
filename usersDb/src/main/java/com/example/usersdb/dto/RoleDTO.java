@@ -1,7 +1,8 @@
 package com.example.usersdb.dto;
 
-import javax.validation.constraints.NotBlank;
 import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
 
 @Data
 public class RoleDTO {

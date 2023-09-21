@@ -2,12 +2,12 @@ package com.example.usersdb.entities;
 
 import com.example.usersdb.dto.UserDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.*;
 import java.util.Set;
 
 @Entity
