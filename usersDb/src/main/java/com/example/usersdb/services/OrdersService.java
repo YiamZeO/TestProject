@@ -34,8 +34,13 @@ public class OrdersService {
         this.usersRepository = usersRepository;
     }
 
-    //TODO Ошбики при сохранении в базу order или productInOrder-ов.
-    // Решить что сохранять раньше order или productInOrder-ы
+    //TODO Ошбики при сохранении в базу order и productInOrder-ов.
+    // 1. Первым должен сохраняться Order
+    // 2. Проверить петливые зависимости между классами
+    // 3. Проверить инициализацию по умолчанию для связующих классов
+    // 4. Если не помогло пройтись по решению ChatGPT
+    // 5. В крайнем случае переопределить hash() в классах, исключив из него связующие классы
+    // 6. В самом крайнем случае удалить проект и забыть о нем
     @Transactional
     public void addOrder(OrderDTO orderDTO){
         Order order = new Order(orderDTO);

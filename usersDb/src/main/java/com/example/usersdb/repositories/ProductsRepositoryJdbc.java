@@ -28,6 +28,7 @@ public class ProductsRepositoryJdbc {
         p.setName(resultSetProduct.getString("name"));
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
+            dateFormat.format(new Date());
             p.setDate(dateFormat.parse(resultSetProduct.getString("date")));
         } catch (ParseException e) {
             e.printStackTrace();
