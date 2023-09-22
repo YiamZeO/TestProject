@@ -4,7 +4,7 @@ import com.example.usersdb.dto.ProductDTO;
 import com.example.usersdb.dto.ProductSpecDTO;
 import com.example.usersdb.dto.ProductsSpecAndExcelDataStyleDTO;
 import com.example.usersdb.entities.Product;
-import com.example.usersdb.responsObjects.FilteringResponsObject;
+import com.example.usersdb.responseObjects.FilteringResponseObj;
 import com.example.usersdb.services.ProductsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -21,11 +21,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/products")
 @Validated
-public class ProductController {
+public class ProductsController {
     private final ProductsService productsService;
 
     @Autowired
-    public ProductController(ProductsService productsService) {
+    public ProductsController(ProductsService productsService) {
         this.productsService = productsService;
     }
 
@@ -48,7 +48,7 @@ public class ProductController {
     }
 
     @GetMapping("/products_list")
-    public FilteringResponsObject productsWithFiltering(@RequestBody ProductSpecDTO productSpecDTO) {
+    public FilteringResponseObj productsWithFiltering(@RequestBody ProductSpecDTO productSpecDTO) {
         return productsService.getProductsWithPgAndFl(productSpecDTO);
     }
 
@@ -75,7 +75,7 @@ public class ProductController {
     }
 
     @GetMapping("/products_list_stream_case")
-    public FilteringResponsObject productsWithFilteringStreamCase(@RequestBody ProductSpecDTO productSpecDTO) {
+    public FilteringResponseObj productsWithFilteringStreamCase(@RequestBody ProductSpecDTO productSpecDTO) {
         return productsService.getProductsWithPgAndFl(productSpecDTO);
     }
 
@@ -104,7 +104,7 @@ public class ProductController {
     }
 
     @GetMapping("/products_list_jdbc")
-    public FilteringResponsObject productsWithFilteringJdbc(@RequestBody ProductSpecDTO productSpecDTO) {
+    public FilteringResponseObj productsWithFilteringJdbc(@RequestBody ProductSpecDTO productSpecDTO) {
         return productsService.getProductsWithPgAndFlJdbc(productSpecDTO);
     }
 

@@ -18,11 +18,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((authz) -> authz
-                        .requestMatchers(new AntPathRequestMatcher("/users/findBy")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/users/addUser")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/products/products_list")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/orders/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/users/**")).hasRole("ADMIN")
-                        .requestMatchers(new AntPathRequestMatcher("/products/ProductsList")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/products/**")).hasRole("ADMIN")
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 //.formLogin(Customizer.withDefaults());
                 .httpBasic(Customizer.withDefaults());

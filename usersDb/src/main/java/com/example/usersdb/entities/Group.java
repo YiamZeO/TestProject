@@ -23,6 +23,7 @@ public class Group {
     private String name;
     @Column
     private Long rating;
+
     @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("groups")
     private Set<User> group_users;

@@ -9,7 +9,7 @@ import com.example.usersdb.repositories.ProductsRepository;
 import com.example.usersdb.repositories.ProductsRepositoryJdbc;
 import com.example.usersdb.repositories.TagsForProductsRepository;
 import com.example.usersdb.repositories.specs.ProductsSpecs;
-import com.example.usersdb.responsObjects.FilteringResponsObject;
+import com.example.usersdb.responseObjects.FilteringResponseObj;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +41,9 @@ public class ProductsService {
         this.productsRepositoryJdbc = productsRepositoryJdbc;
     }
 
-    public FilteringResponsObject getProductsWithPgAndFl(ProductSpecDTO productSpecDTO) {
+    public FilteringResponseObj getProductsWithPgAndFl(ProductSpecDTO productSpecDTO) {
         Specification<Product> spec = Specification.where(null);
-        FilteringResponsObject res = new FilteringResponsObject();
+        FilteringResponseObj res = new FilteringResponseObj();
         if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
             productSpecDTO.setCurPage(INITIAL_PAGE);
         if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
@@ -81,21 +81,18 @@ public class ProductsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> addProduct(ProductDTO productDTO) {
         productsRepository.save(new Product(productDTO));
         return productsRepository.findAll();
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> deleteById(Long id) {
         productsRepository.deleteById(id);
         return productsRepository.findAll();
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> updateProduct(Long id, ProductDTO productDTO) {
         Optional<Product> o = productsRepository.findById(id);
         if (o.isPresent()) {
@@ -122,7 +119,6 @@ public class ProductsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> delProductTag(Long productId, Long tagId) {
         Optional<Product> p = productsRepository.findById(productId);
         Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
@@ -231,7 +227,6 @@ public class ProductsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> addProductTagJdbc(Long productId, Long tagId) {
         Product p = productsRepositoryJdbc.findById(productId);
         Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
@@ -242,7 +237,6 @@ public class ProductsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> delProductTagJdbc(Long productId, Long tagId) {
         Product p = productsRepositoryJdbc.findById(productId);
         Optional<TagsForProducts> t = tagsForProductsRepository.findById(tagId);
@@ -253,14 +247,12 @@ public class ProductsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> deleteProductJdbc(Long id) {
         productsRepositoryJdbc.deleteById(id);
         return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> updateProductJdbc(Long id, ProductDTO productDTO) {
         Product p = productsRepositoryJdbc.findById(id);
         if (p != null) {
@@ -275,14 +267,13 @@ public class ProductsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<Product> addProductJdbc(ProductDTO productDTO) {
         productsRepositoryJdbc.insertProduct(new Product(productDTO));
         return productsRepositoryJdbc.findBySpec(new ProductSpecDTO());
     }
 
-    public FilteringResponsObject getProductsWithPgAndFlJdbc(ProductSpecDTO productSpecDTO) {
-        FilteringResponsObject res = new FilteringResponsObject();
+    public FilteringResponseObj getProductsWithPgAndFlJdbc(ProductSpecDTO productSpecDTO) {
+        FilteringResponseObj res = new FilteringResponseObj();
         if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
             productSpecDTO.setCurPage(INITIAL_PAGE);
         if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)
@@ -298,9 +289,9 @@ public class ProductsService {
         return res;
     }
 
-    public FilteringResponsObject getProductsWithPgAndFlStreamCase(ProductSpecDTO productSpecDTO) {
+    public FilteringResponseObj getProductsWithPgAndFlStreamCase(ProductSpecDTO productSpecDTO) {
         Stream<Product> streamProducts = productsRepository.findAll().stream();
-        FilteringResponsObject res = new FilteringResponsObject();
+        FilteringResponseObj res = new FilteringResponseObj();
         if (productSpecDTO.getCurPage() == null || productSpecDTO.getCurPage() < 1)
             productSpecDTO.setCurPage(INITIAL_PAGE);
         if (productSpecDTO.getPageSize() == null || productSpecDTO.getPageSize() < 1)

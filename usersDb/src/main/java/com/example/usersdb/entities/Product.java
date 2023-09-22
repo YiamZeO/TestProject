@@ -32,6 +32,7 @@ public class Product {
     private Long cost;
     @Column
     private Long quality;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "products_tags",
@@ -40,6 +41,9 @@ public class Product {
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
     @JsonIgnoreProperties("products")
     private Set<TagsForProducts> tags = new HashSet<>();
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("product")
+    private Set<ProductInOrder> productInOrders;
 
     public Product(ProductDTO productDTO) {
         this.name = productDTO.getName();

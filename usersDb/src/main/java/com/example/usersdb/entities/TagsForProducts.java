@@ -24,6 +24,7 @@ public class TagsForProducts {
     private String description;
     @Column
     private Long usage;
+
     @ManyToMany(mappedBy = "tags", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("tags")
     private Set<Product> products;

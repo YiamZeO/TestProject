@@ -26,6 +26,7 @@ public class User {
     private Long age;
     @Column
     private String password;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "users_roles",
@@ -42,10 +43,14 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "group_id"))
     @JsonIgnoreProperties("group_users")
     private Set<Group> groups;
+    @OneToMany(mappedBy = "orderUser", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("orderUser")
+    private Set<Order> orders;
 
     public User(UserDTO userDTO) {
         this.name = userDTO.getName();
         this.age = userDTO.getAge();
+        this.password = userDTO.getPassword();
     }
 
     @Transactional
@@ -70,5 +75,17 @@ public class User {
     public void removeGroup(Group group) {
         this.groups.remove(group);
         group.getGroup_users().remove(this);
+    }
+
+    @Transactional
+    public void addOrder(Order order){
+        this.orders.add(order);
+        order.setOrderUser(this);
+    }
+
+    @Transactional
+    public void delOrder(Order order){
+        this.orders.remove(order);
+        order.setOrderUser(null);
     }
 }

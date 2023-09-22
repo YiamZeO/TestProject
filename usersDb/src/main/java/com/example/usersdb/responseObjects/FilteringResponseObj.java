@@ -1,11 +1,11 @@
-package com.example.usersdb.responsObjects;
+package com.example.usersdb.responseObjects;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class FilteringResponsObject {
+public class FilteringResponseObj {
     private Integer currentPage;
     private Integer totalPages;
     private Integer pageSize;

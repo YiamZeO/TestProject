@@ -21,6 +21,7 @@ public class Role {
     private Long id;
     @Column
     private String name;
+
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("roles")
     private Set<User> role_users;

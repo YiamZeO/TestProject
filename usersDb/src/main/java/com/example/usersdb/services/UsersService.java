@@ -43,7 +43,6 @@ public class UsersService implements UserDetailsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<User> saveUser(UserDTO userDTO) {
         userDTO.setPassword(bCryptPasswordEncoder.encode(userDTO.getPassword()));
         usersRepository.save(new User(userDTO));
@@ -51,14 +50,12 @@ public class UsersService implements UserDetailsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<User> deleteById(Long id) {
         usersRepository.deleteById(id);
         return usersRepository.findAll();
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<User> updateUser(Long id, UserDTO userDTO) {
         Optional<User> o = usersRepository.findById(id);
         if (o.isPresent()) {
@@ -83,7 +80,6 @@ public class UsersService implements UserDetailsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<User> delUserRole(Long userId, Long roleId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Role> r = rolesRepository.findById(roleId);
@@ -94,7 +90,6 @@ public class UsersService implements UserDetailsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<User> addUserRole(Long userId, Long roleId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Role> r = rolesRepository.findById(roleId);
@@ -105,7 +100,6 @@ public class UsersService implements UserDetailsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<User> delUserGroup(Long userId, Long groupId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Group> g = groupsRepository.findById(groupId);
@@ -116,7 +110,6 @@ public class UsersService implements UserDetailsService {
     }
 
     @Transactional
-    @Secured(value = "ADMIN")
     public List<User> addUserGroup(Long userId, Long groupId) {
         Optional<User> u = usersRepository.findById(userId);
         Optional<Group> g = groupsRepository.findById(groupId);
