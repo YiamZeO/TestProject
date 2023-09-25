@@ -2,7 +2,9 @@ package com.example.usersdb.entities;
 
 import com.example.usersdb.dto.OrderDTO;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,7 @@ import java.util.Set;
 @Table(name = "orders", schema = "users_schema")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"orderUser", "productsInOrder"})
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +30,7 @@ public class Order {
     @JsonIgnoreProperties("orders")
     private User orderUser;
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
-    @JsonIgnoreProperties({"order", "productInOrderCompKey"})
+    @JsonIgnoreProperties("order")
     private Set<ProductInOrder> productsInOrder = new HashSet<>();
 
     public Order(OrderDTO orderDTO){

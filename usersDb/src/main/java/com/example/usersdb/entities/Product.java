@@ -43,7 +43,7 @@ public class Product {
     private Set<TagsForProducts> tags = new HashSet<>();
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @JsonIgnoreProperties("product")
-    private Set<ProductInOrder> productInOrders;
+    private Set<ProductInOrder> productsInOrders;
 
     public Product(ProductDTO productDTO) {
         this.name = productDTO.getName();

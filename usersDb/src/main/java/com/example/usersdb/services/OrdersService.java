@@ -47,6 +47,7 @@ public class OrdersService {
         Optional<User> user = usersRepository.findById(orderDTO.getUserId());
         if (user.isPresent()){
             order.setOrderUser(user.get());
+            orderRepository.save(order);
             for (Map<String, Long> p : orderDTO.getProductsInOrder()){
                 Optional<Product> product = productsRepository.findById(p.get("productId"));
                 if (product.isPresent()){
@@ -60,7 +61,6 @@ public class OrdersService {
                     throw new RuntimeException("Add order exception: Product with id "
                             + p.get("productId") + " not found in database");
             }
-            orderRepository.save(order);
         }
         else
             throw new RuntimeException("Add order exception: User with id "

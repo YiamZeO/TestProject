@@ -1,7 +1,9 @@
 package com.example.usersdb.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -10,6 +12,7 @@ import javax.persistence.*;
 @Table(name = "products_in_order", schema = "users_schema")
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode(exclude = {"order", "product"})
 public class ProductInOrder {
     @Id
     @EmbeddedId
@@ -25,7 +28,7 @@ public class ProductInOrder {
     @ManyToOne
     @JoinColumn(name = "product_id")
     @MapsId("productId")
-    @JsonIgnoreProperties("productInOrders")
+    @JsonIgnoreProperties("productsInOrders")
     private Product product;
 
     public ProductInOrder(Long productCount, Long productId, Long productCost){
